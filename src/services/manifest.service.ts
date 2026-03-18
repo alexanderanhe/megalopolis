@@ -23,7 +23,18 @@ const isInsideDir = (dir: string, filePath: string) => {
 };
 
 const listManifests = async () => {
-  const files = await fs.readdir(manifestsDir);
+  const files = await fs
+    .readdir(manifestsDir)
+    .catch((err) => {
+      if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT') {
+        throw new ApiError(
+          'Manifests directory not found. Ensure assets are copied to dist.',
+          500,
+          'MANIFESTS_UNAVAILABLE'
+        );
+      }
+      throw err;
+    });
   const yamlFiles = files.filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'));
 
   return yamlFiles.map((file) => {
