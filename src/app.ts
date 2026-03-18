@@ -17,6 +17,17 @@ const app = express();
 const swaggerSpecPath = path.join(__dirname, '../docs/openapi.yaml');
 const swaggerSpec = YAML.parse(fs.readFileSync(swaggerSpecPath, 'utf8'));
 
+const parseTrustProxy = (value: string) => {
+  if (value === '') return false;
+  const lower = value.toLowerCase();
+  if (lower === 'true') return true;
+  if (lower === 'false') return false;
+  const asNumber = Number.parseInt(value, 10);
+  if (Number.isNaN(asNumber) === false) return asNumber;
+  return value;
+};
+
+app.set('trust proxy', parseTrustProxy(env.trustProxy));
 app.use(helmet());
 app.use(cors({ origin: env.corsOrigin }));
 app.use(express.json());

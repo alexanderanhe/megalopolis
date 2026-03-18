@@ -11,6 +11,7 @@ const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: toInt(process.env.PORT, 3000),
   corsOrigin: process.env.CORS_ORIGIN || '*',
+  trustProxy: process.env.TRUST_PROXY || '',
   cacheTtlDefault: toInt(process.env.CACHE_TTL_DEFAULT, 300),
   weatherCacheTtl: toInt(process.env.WEATHER_CACHE_TTL, 300),
   hncCacheTtl: toInt(process.env.HNC_CACHE_TTL, 3600),
