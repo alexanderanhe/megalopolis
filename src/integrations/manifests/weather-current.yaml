@@ -1,0 +1,75 @@
+apiVersion: dashboard.integrations/v1alpha1
+kind: WidgetIntegration
+metadata:
+  id: widget.megalopolis.weather.current
+  name: Weather Current
+  slug: weather-current
+  version: 1.0.0
+  category: weather
+  subcategory: current
+  description: Current weather for a city
+  icon: cloud
+  tags:
+    - weather
+    - current
+    - megalopolis
+source:
+  type: http
+  protocol: https
+  baseUrl: ${API_BASE_URL}
+  path: /weather/current
+  method: GET
+  accept: application/json
+  timeoutMs: 8000
+auth:
+  type: none
+  required: false
+input:
+  pathParams: []
+  queryParams:
+    - key: city
+      source: user
+      required: true
+      queryName: city
+  headers: []
+  body:
+    enabled: false
+output:
+  format: json
+  schema:
+    type: object
+    properties:
+      success:
+        type: boolean
+      updatedAt:
+        type: string
+        format: date-time
+      data:
+        type: object
+        properties:
+          city:
+            type: string
+          temperatureC:
+            type: number
+          humidity:
+            type: number
+          condition:
+            type: string
+          windKph:
+            type: number
+docs:
+  summary: Returns current weather data for the requested city.
+  notes:
+    - Replace baseUrl with your deployed API domain.
+examples:
+  config:
+    city: cdmx
+  expectedResponse:
+    success: true
+    updatedAt: 2026-03-18T12:00:00.000Z
+    data:
+      city: cdmx
+      temperatureC: 22
+      humidity: 55
+      condition: clear
+      windKph: 10

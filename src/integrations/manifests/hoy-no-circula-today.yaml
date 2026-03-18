@@ -1,0 +1,96 @@
+apiVersion: dashboard.integrations/v1alpha1
+kind: WidgetIntegration
+metadata:
+  id: widget.megalopolis.hoy-no-circula.today
+  name: Hoy No Circula Today
+  slug: hoy-no-circula-today
+  version: 1.0.0
+  category: mobility
+  subcategory: restrictions
+  description: Today's Hoy No Circula restrictions for CDMX
+  icon: car
+  tags:
+    - hoy-no-circula
+    - mobility
+    - cdmx
+source:
+  type: http
+  protocol: https
+  baseUrl: ${API_BASE_URL}
+  path: /hoy-no-circula/today
+  method: GET
+  accept: application/json
+  timeoutMs: 8000
+auth:
+  type: none
+  required: false
+input:
+  pathParams: []
+  queryParams: []
+  headers: []
+  body:
+    enabled: false
+output:
+  format: json
+  schema:
+    type: object
+    properties:
+      success:
+        type: boolean
+      updatedAt:
+        type: string
+        format: date-time
+      data:
+        type: object
+        properties:
+          date:
+            type: string
+          scope:
+            type: array
+            items:
+              type: string
+          restrictionStart:
+            type: string
+          restrictionEnd:
+            type: string
+          restrictions:
+            type: object
+            properties:
+              color:
+                type: string
+              plateEndings:
+                type: array
+                items:
+                  type: number
+              holograms:
+                type: array
+                items:
+                  type: string
+          exemptions:
+            type: array
+            items:
+              type: string
+docs:
+  summary: Returns today's Hoy No Circula rules.
+  notes:
+    - Replace baseUrl with your deployed API domain.
+examples:
+  expectedResponse:
+    success: true
+    updatedAt: 2026-03-18T12:00:00.000Z
+    data:
+      date: 2026-03-18
+      scope:
+        - cdmx
+      restrictionStart: "05:00"
+      restrictionEnd: "22:00"
+      restrictions:
+        color: amarillo
+        plateEndings:
+          - 5
+          - 6
+        holograms:
+          - 1
+          - 2
+      exemptions:
+        - electrico

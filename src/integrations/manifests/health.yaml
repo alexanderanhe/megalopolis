@@ -1,0 +1,49 @@
+apiVersion: dashboard.integrations/v1alpha1
+kind: WidgetIntegration
+metadata:
+  id: widget.megalopolis.health
+  name: API Health
+  slug: health
+  version: 1.0.0
+  category: system
+  subcategory: health
+  description: Health check endpoint for the Megalopolis API
+  icon: activity
+  tags:
+    - health
+    - status
+    - megalopolis
+source:
+  type: http
+  protocol: https
+  baseUrl: ${API_BASE_URL}
+  path: /health
+  method: GET
+  accept: application/json
+  timeoutMs: 5000
+auth:
+  type: none
+  required: false
+input:
+  pathParams: []
+  queryParams: []
+  headers: []
+  body:
+    enabled: false
+output:
+  format: json
+  schema:
+    type: object
+    properties:
+      success:
+        type: boolean
+      message:
+        type: string
+docs:
+  summary: Returns a basic health message to confirm the API is running.
+  notes:
+    - Replace baseUrl with your deployed API domain.
+examples:
+  expectedResponse:
+    success: true
+    message: API is running

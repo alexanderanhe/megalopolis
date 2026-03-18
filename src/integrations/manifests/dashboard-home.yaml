@@ -1,0 +1,119 @@
+apiVersion: dashboard.integrations/v1alpha1
+kind: WidgetIntegration
+metadata:
+  id: widget.megalopolis.dashboard.home
+  name: Dashboard Home
+  slug: dashboard-home
+  version: 1.0.0
+  category: dashboard
+  subcategory: home
+  description: Aggregated data for the home dashboard (weather + hoy no circula)
+  icon: dashboard
+  tags:
+    - dashboard
+    - home
+    - megalopolis
+source:
+  type: http
+  protocol: https
+  baseUrl: ${API_BASE_URL}
+  path: /dashboard/home
+  method: GET
+  accept: application/json
+  timeoutMs: 8000
+auth:
+  type: none
+  required: false
+input:
+  pathParams: []
+  queryParams: []
+  headers: []
+  body:
+    enabled: false
+output:
+  format: json
+  schema:
+    type: object
+    properties:
+      success:
+        type: boolean
+      updatedAt:
+        type: string
+        format: date-time
+      data:
+        type: object
+        properties:
+          hoyNoCircula:
+            type: object
+            properties:
+              date:
+                type: string
+              scope:
+                type: array
+                items:
+                  type: string
+              restrictionStart:
+                type: string
+              restrictionEnd:
+                type: string
+              restrictions:
+                type: object
+                properties:
+                  color:
+                    type: string
+                  plateEndings:
+                    type: array
+                    items:
+                      type: number
+                  holograms:
+                    type: array
+                    items:
+                      type: string
+              exemptions:
+                type: array
+                items:
+                  type: string
+          weather:
+            type: object
+            properties:
+              city:
+                type: string
+              temperatureC:
+                type: number
+              humidity:
+                type: number
+              condition:
+                type: string
+              windKph:
+                type: number
+docs:
+  summary: Returns aggregated data for the dashboard home view.
+  notes:
+    - Replace baseUrl with your deployed API domain.
+examples:
+  expectedResponse:
+    success: true
+    updatedAt: 2026-03-18T12:00:00.000Z
+    data:
+      hoyNoCircula:
+        date: 2026-03-18
+        scope:
+          - cdmx
+        restrictionStart: "05:00"
+        restrictionEnd: "22:00"
+        restrictions:
+          color: amarillo
+          plateEndings:
+            - 5
+            - 6
+          holograms:
+            - 1
+            - 2
+        exemptions:
+          - electrico
+      weather:
+        city: cdmx
+        temperatureC: 22
+        humidity: 55
+        condition: clear
+        windKph: 10
