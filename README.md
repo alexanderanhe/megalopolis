@@ -18,12 +18,17 @@ npm install
 npm run dev
 ~~~
 
+## Build
+
+~~~bash
+npm run build
+~~~
+
 ## Produccion
 
 ~~~bash
 npm run start
 ~~~
-
 ## Variables de entorno
 
 Copia el archivo .env.example a .env y ajusta los valores segun tu entorno.
@@ -33,49 +38,49 @@ WEATHER_PROVIDER y HNC_PROVIDER definen el adapter activo, por defecto mock.
 
 ~~~
 src/
-  app.js
-  server.js
+  app.ts
+  server.ts
   config/
-    env.js
+    env.ts
   routes/
-    index.js
-    health.routes.js
-    dashboard.routes.js
-    hoyNoCircula.routes.js
-    weather.routes.js
+    index.ts
+    health.routes.ts
+    dashboard.routes.ts
+    hoyNoCircula.routes.ts
+    weather.routes.ts
   controllers/
-    health.controller.js
-    dashboard.controller.js
-    hoyNoCircula.controller.js
-    weather.controller.js
+    health.controller.ts
+    dashboard.controller.ts
+    hoyNoCircula.controller.ts
+    weather.controller.ts
   services/
-    hoyNoCircula.service.js
-    weather.service.js
-    dashboard.service.js
+    hoyNoCircula.service.ts
+    weather.service.ts
+    dashboard.service.ts
   providers/
     hoyNoCircula/
-      index.js
-      provider.js
-      mock.provider.js
+      index.ts
+      provider.ts
+      mock.provider.ts
     weather/
-      index.js
-      provider.js
-      mock.provider.js
+      index.ts
+      provider.ts
+      mock.provider.ts
   validators/
-    common.validators.js
-    weather.validators.js
+    common.validators.ts
+    weather.validators.ts
   middlewares/
-    errorHandler.js
-    notFound.js
-    rateLimiter.js
+    errorHandler.ts
+    notFound.ts
+    rateLimiter.ts
   utils/
-    apiError.js
-    asyncHandler.js
-    cache.js
-    logger.js
-    date.js
+    apiError.ts
+    asyncHandler.ts
+    cache.ts
+    logger.ts
+    date.ts
   jobs/
-    refreshCache.job.js
+    refreshCache.job.ts
 ~~~
 
 ## Endpoints disponibles
