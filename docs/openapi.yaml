@@ -1,0 +1,183 @@
+openapi: 3.0.3
+info:
+  title: Megalopolis API
+  version: 1.0.0
+  description: API agregadora modular para dashboard personal
+servers:
+  - url: http://localhost:3000
+    description: Local
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: API is running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /hoy-no-circula/today:
+    get:
+      summary: Hoy No Circula (mock)
+      responses:
+        '200':
+          description: Estado del programa hoy no circula
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HncResponse'
+  /weather/current:
+    get:
+      summary: Weather current (mock)
+      parameters:
+        - in: query
+          name: city
+          required: true
+          schema:
+            type: string
+            example: cdmx
+      responses:
+        '200':
+          description: Weather data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeatherResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /dashboard/home:
+    get:
+      summary: Dashboard aggregated response
+      responses:
+        '200':
+          description: Aggregated dashboard payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: API is running
+    HncResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-03-18T00:00:00.000Z
+        data:
+          $ref: '#/components/schemas/HncData'
+    HncData:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          example: 2026-03-18
+        scope:
+          type: array
+          items:
+            type: string
+          example: [CDMX, EDOMEX]
+        restrictionStart:
+          type: string
+          example: 05:00
+        restrictionEnd:
+          type: string
+          example: 22:00
+        restrictions:
+          type: object
+          properties:
+            color:
+              type: string
+              example: rojo
+            plateEndings:
+              type: array
+              items:
+                type: integer
+              example: [3, 4]
+            holograms:
+              type: array
+              items:
+                type: string
+              example: ["1", "2"]
+        exemptions:
+          type: array
+          items:
+            type: string
+          example: ["00", "0", "eléctricos", "híbridos"]
+    WeatherResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-03-18T00:00:00.000Z
+        data:
+          $ref: '#/components/schemas/WeatherData'
+    WeatherData:
+      type: object
+      properties:
+        city:
+          type: string
+          example: cdmx
+        temperatureC:
+          type: number
+          example: 22
+        humidity:
+          type: number
+          example: 48
+        condition:
+          type: string
+          example: Parcialmente nublado
+        windKph:
+          type: number
+          example: 12
+    DashboardResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2026-03-18T00:00:00.000Z
+        data:
+          type: object
+          properties:
+            hoyNoCircula:
+              $ref: '#/components/schemas/HncData'
+            weather:
+              $ref: '#/components/schemas/WeatherData'
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Invalid query parameters
+        error:
+          type: string
+          example: VALIDATION_ERROR
