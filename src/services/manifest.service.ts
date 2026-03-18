@@ -57,13 +57,10 @@ const listManifests = async () => {
   });
 };
 
-const replacePlaceholders = (value: unknown) => {
+const replacePlaceholders = (value: unknown): unknown => {
   const placeholder = '${API_BASE_URL}';
   if (typeof value === 'string') {
-    if (value.includes(placeholder)) {
-      return value.replaceAll(placeholder, env.apiBaseUrl);
-    }
-    return value;
+    return value.split(placeholder).join(env.apiBaseUrl);
   }
   if (Array.isArray(value)) {
     return value.map((item) => replacePlaceholders(item));
@@ -115,7 +112,7 @@ const getManifest = async (slug: string) => {
   }
 
   const yaml = await fs.readFile(candidate, 'utf8');
-  const resolved = env.apiBaseUrl === '' ? yaml : yaml.replaceAll('${API_BASE_URL}', env.apiBaseUrl);
+  const resolved = yaml.split('${API_BASE_URL}').join(env.apiBaseUrl);
   return { format, data: resolved } as const;
 };
 
