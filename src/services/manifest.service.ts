@@ -16,6 +16,19 @@ const isValidSlug = (slug: string) => {
   return true;
 };
 
+const parseSlug = (slug: string) => {
+  if (slug.endsWith('.json')) {
+    return { format: 'json' as const, baseSlug: slug.slice(0, -5) };
+  }
+  if (slug.endsWith('.yaml')) {
+    return { format: 'yaml' as const, baseSlug: slug.slice(0, -5) };
+  }
+  if (slug.endsWith('.yml')) {
+    return { format: 'yaml' as const, baseSlug: slug.slice(0, -4) };
+  }
+  return { format: 'yaml' as const, baseSlug: slug };
+};
+
 const isInsideDir = (dir: string, filePath: string) => {
   const resolvedDir = path.resolve(dir);
   const resolvedFile = path.resolve(filePath);
@@ -43,13 +56,9 @@ const listManifests = async () => {
   });
 };
 
-const getManifest = async (slug: string) => {
-  if (isValidSlug(slug) === false) {
-    throw new ApiError('Manifest not found', 404, 'MANIFEST_NOT_FOUND');
-  }
-
-  const yamlPath = path.join(manifestsDir, slug + '.yaml');
-  const ymlPath = path.join(manifestsDir, slug + '.yml');
+const resolveManifestPath = async (baseSlug: string) => {
+  const yamlPath = path.join(manifestsDir, baseSlug + '.yaml');
+  const ymlPath = path.join(manifestsDir, baseSlug + '.yml');
 
   const candidate = await fs
     .access(yamlPath)
@@ -66,7 +75,24 @@ const getManifest = async (slug: string) => {
     throw new ApiError('Manifest not found', 404, 'MANIFEST_NOT_FOUND');
   }
 
-  return parseYamlFile(candidate);
+  return candidate;
+};
+
+const getManifest = async (slug: string) => {
+  const { format, baseSlug } = parseSlug(slug);
+  if (isValidSlug(baseSlug) === false) {
+    throw new ApiError('Manifest not found', 404, 'MANIFEST_NOT_FOUND');
+  }
+
+  const candidate = await resolveManifestPath(baseSlug);
+
+  if (format === 'json') {
+    const json = await parseYamlFile(candidate);
+    return { format, data: json } as const;
+  }
+
+  const yaml = await fs.readFile(candidate, 'utf8');
+  return { format, data: yaml } as const;
 };
 
 export { listManifests, getManifest };

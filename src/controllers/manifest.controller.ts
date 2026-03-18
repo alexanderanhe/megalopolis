@@ -13,10 +13,11 @@ const listManifestsController = asyncHandler(async (req: Request, res: Response)
 const getManifestController = asyncHandler(async (req: Request, res: Response) => {
   const { slug } = req.params;
   const manifest = await getManifest(slug);
-  res.json({
-    success: true,
-    data: manifest
-  });
+  if (manifest.format === 'json') {
+    res.json(manifest.data);
+    return;
+  }
+  res.type('text/yaml').send(manifest.data);
 });
 
 export { listManifestsController as listManifests, getManifestController as getManifest };
