@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import ApiError from '../utils/apiError';
 import { parseYamlFile } from '../utils/yaml';
+import env from '../config/env';
 
 const manifestsDir = path.join(__dirname, '../integrations/manifests');
 
@@ -56,6 +57,27 @@ const listManifests = async () => {
   });
 };
 
+const replacePlaceholders = (value: unknown) => {
+  const placeholder = '${API_BASE_URL}';
+  if (typeof value === 'string') {
+    if (value.includes(placeholder)) {
+      return value.replaceAll(placeholder, env.apiBaseUrl);
+    }
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => replacePlaceholders(item));
+  }
+  if (value && typeof value === 'object') {
+    const output: Record<string, unknown> = {};
+    for (const [key, item] of Object.entries(value)) {
+      output[key] = replacePlaceholders(item);
+    }
+    return output;
+  }
+  return value;
+};
+
 const resolveManifestPath = async (baseSlug: string) => {
   const yamlPath = path.join(manifestsDir, baseSlug + '.yaml');
   const ymlPath = path.join(manifestsDir, baseSlug + '.yml');
@@ -88,11 +110,13 @@ const getManifest = async (slug: string) => {
 
   if (format === 'json') {
     const json = await parseYamlFile(candidate);
-    return { format, data: json } as const;
+    const resolved = replacePlaceholders(json);
+    return { format, data: resolved } as const;
   }
 
   const yaml = await fs.readFile(candidate, 'utf8');
-  return { format, data: yaml } as const;
+  const resolved = env.apiBaseUrl === '' ? yaml : yaml.replaceAll('${API_BASE_URL}', env.apiBaseUrl);
+  return { format, data: resolved } as const;
 };
 
 export { listManifests, getManifest };
