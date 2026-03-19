@@ -1,5 +1,6 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
+
 metadata:
   id: mobility.hoy-no-circula.today
   name: Hoy No Circula Today
@@ -24,6 +25,7 @@ metadata:
   visibility: private
   status: active
   locale: es-MX
+
 source:
   type: rest
   protocol: https
@@ -39,13 +41,16 @@ source:
   rateLimitHint:
     requests: 60
     per: minute
+
 auth:
   type: none
   required: false
   fields: []
   notes: []
+
 config:
   fields: []
+
 input:
   pathParams: []
   queryParams: []
@@ -54,6 +59,7 @@ input:
     enabled: false
     contentType: application/json
     template: {}
+
 refresh:
   enabled: true
   mode: polling
@@ -73,6 +79,7 @@ refresh:
   dedupeWindowSeconds: 30
   maxRefreshPerHour: 12
   cron: null
+
 cache:
   enabled: true
   strategy: ttl
@@ -85,6 +92,7 @@ cache:
     unit: minutes
   scope: user
   keyTemplate: "integration:{metadata.id}"
+
 sse:
   enabled: true
   frontendPushEnabled: true
@@ -93,11 +101,17 @@ sse:
   broadcastScope: user
   emitOnlyOnChange: true
   heartbeatSeconds: 25
+
 output:
   format: object
   primaryFields:
     - updatedAt
-    - data
+    - data.date
+    - data.restrictions.color
+    - data.restrictions.plateEndings
+    - data.restrictions.holograms
+    - data.restrictionStart
+    - data.restrictionEnd
   schema:
     type: object
     properties:
@@ -132,6 +146,10 @@ output:
                 type: array
                 items:
                   type: string
+            required:
+              - color
+              - plateEndings
+              - holograms
           exemptions:
             type: array
             items:
@@ -148,6 +166,8 @@ output:
       - data
   normalization:
     enabled: false
+    strategy: none
+
 ui:
   widget:
     type: status-card
@@ -168,75 +188,98 @@ ui:
     resizable: true
     movable: true
     liveBadge: true
+
   presentation:
     icon: car-off
     color: amber
     preferredLayout: compact
+
   layout:
     variant: restriction-status-card
     density: compact
     sections:
       - id: header
-        type: inline
+        type: stack
         fields:
           - title
           - formattedDate
+
       - id: primaryStatus
         type: stack
         fields:
-          - statusLabel
-          - restrictionSummary
-          - hologramSummary
+          - restrictionColor
+          - plateEndings
+          - holograms
+
       - id: schedule
         type: inline
         fields:
-          - scheduleRange
+          - restrictionHours
+
       - id: footer
         type: actions
         fields:
           - details
           - refresh
+
   bindings:
     title:
       source: static
       value: Hoy No Circula
+
     formattedDate:
       source: data.data.date
       formatter: weekdayShortDateEsMx
-    statusLabel:
-      source: computed.statusLabel
-    restrictionSummary:
-      source: computed.restrictionSummary
-    hologramSummary:
-      source: computed.hologramSummary
-    scheduleRange:
-      source: computed.scheduleRange
+
+    restrictionColor:
+      source: data.data.restrictions.color
+      label: Engomado
+
+    plateEndings:
+      source: data.data.restrictions.plateEndings
+      label: Terminación
+
+    holograms:
+      source: data.data.restrictions.holograms
+      label: Holograma
+
+    restrictionHours:
+      source: static
+      value: "05:00 — 22:00"
+      label: Horario
+
   actions:
     details:
       type: modal
       label: Ver detalles
       target: widget-details
+
     refresh:
       type: refresh
       label: Actualizar
       icon: refresh-cw
+
   states:
     ok:
       tone: success
       accentColor: green
       icon: check-circle
+
     restricted:
       tone: danger
       accentColor: red
       icon: ban
+
     warning:
       tone: warning
       accentColor: amber
       icon: alert-triangle
+
     error:
       tone: danger
       accentColor: red
       icon: alert-circle
+
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -246,6 +289,7 @@ policies:
   redactSensitiveFields: true
   storeSecretsSeparately: true
   allowClientSideExecution: false
+
 observability:
   enabled: true
   logLevel: standard
@@ -257,41 +301,41 @@ observability:
   healthcheck:
     enabled: true
     timeoutMs: 3000
+
 docs:
   summary: Returns today's Hoy No Circula restrictions for CDMX and EDOMEX.
   setupInstructions: []
-  notes: []
+  notes:
+    - This manifest is aligned to the current raw API response.
+    - It does not require a normalized computed payload.
+    - If the runtime later adds computed fields, this manifest can be upgraded.
   changelog:
-    - version: 1.0.0
-      description: Initial manifest version for the daily Hoy No Circula widget.
+    - version: 1.0.1
+      description: Adjusted bindings and UI structure to match the current API response shape.
+
 examples:
   config: {}
   auth: {}
   expectedResponse:
     success: true
-    updatedAt: "2026-03-18T12:00:00.000Z"
+    updatedAt: "2026-03-19T22:30:00.513Z"
     data:
-      date: "2026-03-18"
+      date: "2026-03-19"
       scope:
-        - cdmx
-        - edomex
+        - CDMX
+        - EDOMEX
       restrictionStart: "05:00"
       restrictionEnd: "22:00"
       restrictions:
-        color: amarillo
+        color: rojo
         plateEndings:
-          - 5
-          - 6
+          - 3
+          - 4
         holograms:
           - "1"
           - "2"
       exemptions:
-        - electrico
-        - hibrido
-        - holograma-0
-        - holograma-00
-    computed:
-      statusLabel: "NO circulan"
-      restrictionSummary: "Amarillo · 5 y 6"
-      hologramSummary: "Holograma 1 y 2"
-      scheduleRange: "05:00 — 22:00"
+        - "00"
+        - "0"
+        - eléctricos
+        - híbridos
