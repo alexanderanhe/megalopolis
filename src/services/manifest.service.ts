@@ -5,6 +5,7 @@ import { parseYamlFile } from '../utils/yaml';
 import env from '../config/env';
 
 const manifestsDir = path.join(__dirname, '../integrations/manifests');
+const registryPath = path.join(__dirname, '../integrations/manifest-registry.yaml');
 
 const isValidSlug = (slug: string) => {
   if (slug.length === 0) return false;
@@ -34,27 +35,6 @@ const isInsideDir = (dir: string, filePath: string) => {
   const resolvedDir = path.resolve(dir);
   const resolvedFile = path.resolve(filePath);
   return resolvedFile.startsWith(resolvedDir + path.sep);
-};
-
-const listManifests = async () => {
-  const files = await fs
-    .readdir(manifestsDir)
-    .catch((err) => {
-      if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT') {
-        throw new ApiError(
-          'Manifests directory not found. Ensure assets are copied to dist.',
-          500,
-          'MANIFESTS_UNAVAILABLE'
-        );
-      }
-      throw err;
-    });
-  const yamlFiles = files.filter((f) => f.endsWith('.yaml') || f.endsWith('.yml'));
-
-  return yamlFiles.map((file) => {
-    const slug = file.replace(/\.(yaml|yml)$/i, '');
-    return { slug, file };
-  });
 };
 
 const replacePlaceholders = (value: unknown): unknown => {
@@ -97,23 +77,66 @@ const resolveManifestPath = async (baseSlug: string) => {
   return candidate;
 };
 
-const getManifest = async (slug: string) => {
-  const { format, baseSlug } = parseSlug(slug);
+const getManifestRegistry = async () => {
+  const registry = await parseYamlFile(registryPath).catch((err) => {
+    if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT') {
+      throw new ApiError(
+        'Manifest registry not found. Ensure assets are copied to dist.',
+        500,
+        'MANIFESTS_UNAVAILABLE'
+      );
+    }
+    throw err;
+  });
+  if (Array.isArray(registry) === false) {
+    throw new ApiError('Manifest registry is invalid.', 500, 'MANIFESTS_UNAVAILABLE');
+  }
+  return registry as Array<Record<string, unknown>>;
+};
+
+const listManifests = async () => {
+  const registry = await getManifestRegistry();
+  return registry;
+};
+
+const getManifestRegistryYaml = async () => {
+  const yaml = await fs.readFile(registryPath, 'utf8').catch((err) => {
+    if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT') {
+      throw new ApiError(
+        'Manifest registry not found. Ensure assets are copied to dist.',
+        500,
+        'MANIFESTS_UNAVAILABLE'
+      );
+    }
+    throw err;
+  });
+  return yaml;
+};
+
+const getManifestBySlug = async (baseSlug: string) => {
   if (isValidSlug(baseSlug) === false) {
     throw new ApiError('Manifest not found', 404, 'MANIFEST_NOT_FOUND');
   }
 
   const candidate = await resolveManifestPath(baseSlug);
-
-  if (format === 'json') {
-    const json = await parseYamlFile(candidate);
-    const resolved = replacePlaceholders(json);
-    return { format, data: resolved } as const;
-  }
-
+  const json = await parseYamlFile(candidate);
+  const resolvedJson = replacePlaceholders(json);
   const yaml = await fs.readFile(candidate, 'utf8');
-  const resolved = yaml.split('${API_BASE_URL}').join(env.apiBaseUrl);
-  return { format, data: resolved } as const;
+  const resolvedYaml = yaml.split('${API_BASE_URL}').join(env.apiBaseUrl);
+
+  return { json: resolvedJson, yaml: resolvedYaml } as const;
 };
 
-export { listManifests, getManifest };
+const getManifest = async (slug: string) => {
+  const { format, baseSlug } = parseSlug(slug);
+  const manifest = await getManifestBySlug(baseSlug);
+  return { format, data: format === 'json' ? manifest.json : manifest.yaml } as const;
+};
+
+export {
+  listManifests,
+  getManifest,
+  getManifestBySlug,
+  getManifestRegistry,
+  getManifestRegistryYaml
+};

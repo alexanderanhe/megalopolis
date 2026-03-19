@@ -1,6 +1,5 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
-
 metadata:
   id: system.health.check
   name: API Health
@@ -23,7 +22,6 @@ metadata:
   visibility: private
   status: active
   locale: es-MX
-
 source:
   type: rest
   protocol: https
@@ -39,28 +37,13 @@ source:
   rateLimitHint:
     requests: 120
     per: minute
-
 auth:
   type: none
   required: false
   fields: []
-  notes:
-    - This integration does not require credentials.
-
+  notes: []
 config:
-  fields:
-    - key: customTitle
-      label: Custom title
-      description: Optional custom widget title shown in the dashboard.
-      type: string
-      required: false
-      default: ""
-      minLength: 0
-      maxLength: 80
-      placeholder: Health
-      ui:
-        width: full
-
+  fields: []
 input:
   pathParams: []
   queryParams: []
@@ -69,7 +52,6 @@ input:
     enabled: false
     contentType: application/json
     template: {}
-
 refresh:
   enabled: true
   mode: polling
@@ -88,7 +70,6 @@ refresh:
   dedupeWindowSeconds: 10
   maxRefreshPerHour: 120
   cron: null
-
 cache:
   enabled: true
   strategy: ttl
@@ -101,7 +82,6 @@ cache:
     unit: minutes
   scope: user
   keyTemplate: "integration:{metadata.id}"
-
 sse:
   enabled: false
   frontendPushEnabled: false
@@ -110,11 +90,10 @@ sse:
   broadcastScope: user
   emitOnlyOnChange: true
   heartbeatSeconds: 25
-
 output:
   format: object
   primaryFields:
-    - status
+    - success
     - message
   schema:
     type: object
@@ -123,9 +102,11 @@ output:
         type: boolean
       message:
         type: string
+    required:
+      - success
+      - message
   normalization:
     enabled: false
-
 ui:
   widget:
     type: status-card
@@ -150,7 +131,6 @@ ui:
     icon: activity
     color: green
     preferredLayout: compact
-
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -160,7 +140,6 @@ policies:
   redactSensitiveFields: true
   storeSecretsSeparately: true
   allowClientSideExecution: false
-
 observability:
   enabled: true
   logLevel: standard
@@ -172,21 +151,15 @@ observability:
   healthcheck:
     enabled: true
     timeoutMs: 2000
-
 docs:
   summary: Returns a health status message for the API.
-  setupInstructions:
-    - No credentials are required.
-    - Add the manifest URL to the dashboard system.
-  notes:
-    - Replace API_BASE_URL with your deployment domain.
+  setupInstructions: []
+  notes: []
   changelog:
     - version: 1.0.0
       description: Initial manifest version for health.
-
 examples:
-  config:
-    customTitle: ""
+  config: {}
   auth: {}
   expectedResponse:
     success: true

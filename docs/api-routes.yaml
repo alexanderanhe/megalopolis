@@ -1,0 +1,178 @@
+api:
+  name: Megalopolis API
+  version: 1.0.0
+  description: API aggregator for dashboard widgets.
+routes:
+  - path: /health
+    method: GET
+    purpose: Health check for the API.
+    auth:
+      required: false
+      type: none
+    params: []
+    query: []
+    body: null
+    response:
+      success: boolean
+      message: string
+    widgetWorthy: true
+    manifest: health
+  - path: /hoy-no-circula/today
+    method: GET
+    purpose: Returns today's Hoy No Circula restrictions.
+    auth:
+      required: false
+      type: none
+    params: []
+    query: []
+    body: null
+    response:
+      success: boolean
+      updatedAt: string
+      data:
+        date: string
+        scope: string[]
+        restrictionStart: string
+        restrictionEnd: string
+        restrictions:
+          color: string
+          plateEndings: number[]
+          holograms: string[]
+        exemptions: string[]
+    widgetWorthy: true
+    manifest: hoy-no-circula-today
+  - path: /weather/current
+    method: GET
+    purpose: Returns current weather for a city.
+    auth:
+      required: false
+      type: none
+    params: []
+    query:
+      - name: city
+        type: string
+        required: true
+    body: null
+    response:
+      success: boolean
+      updatedAt: string
+      data:
+        city: string
+        temperatureC: number
+        humidity: number
+        condition: string
+        windKph: number
+    widgetWorthy: true
+    manifest: weather-current
+  - path: /dashboard/home
+    method: GET
+    purpose: Aggregates Hoy No Circula and Weather in one response.
+    auth:
+      required: false
+      type: none
+    params: []
+    query: []
+    body: null
+    response:
+      success: boolean
+      updatedAt: string
+      data:
+        hoyNoCircula:
+          date: string
+          scope: string[]
+          restrictionStart: string
+          restrictionEnd: string
+          restrictions:
+            color: string
+            plateEndings: number[]
+            holograms: string[]
+          exemptions: string[]
+        weather:
+          city: string
+          temperatureC: number
+          humidity: number
+          condition: string
+          windKph: number
+    widgetWorthy: true
+    manifest: dashboard-home
+  - path: /integrations/manifests
+    method: GET
+    purpose: Returns manifest registry list as JSON.
+    auth:
+      required: false
+      type: none
+    params: []
+    query: []
+    body: null
+    response:
+      type: array
+      items: ManifestRegistryEntry
+    widgetWorthy: false
+    manifest: null
+    excludedReason: Not a widget endpoint (registry only).
+  - path: /integrations/manifests.json
+    method: GET
+    purpose: Returns manifest registry list as raw JSON.
+    auth:
+      required: false
+      type: none
+    params: []
+    query: []
+    body: null
+    response:
+      type: array
+      items: ManifestRegistryEntry
+    widgetWorthy: false
+    manifest: null
+    excludedReason: Not a widget endpoint (registry only).
+  - path: /integrations/manifests.yaml
+    method: GET
+    purpose: Returns manifest registry list as raw YAML.
+    auth:
+      required: false
+      type: none
+    params: []
+    query: []
+    body: null
+    response:
+      type: yaml
+      items: ManifestRegistryEntry
+    widgetWorthy: false
+    manifest: null
+    excludedReason: Not a widget endpoint (registry only).
+  - path: /integrations/manifests/:slug.json
+    method: GET
+    purpose: Returns a single manifest in JSON format.
+    auth:
+      required: false
+      type: none
+    params:
+      - name: slug
+        type: string
+        required: true
+    query: []
+    body: null
+    response:
+      type: object
+      schema: WidgetIntegrationManifest
+    widgetWorthy: false
+    manifest: null
+    excludedReason: Not a widget endpoint (manifest delivery).
+  - path: /integrations/manifests/:slug.yaml
+    method: GET
+    purpose: Returns a single manifest in YAML format.
+    auth:
+      required: false
+      type: none
+    params:
+      - name: slug
+        type: string
+        required: true
+    query: []
+    body: null
+    response:
+      type: yaml
+      schema: WidgetIntegrationManifest
+    widgetWorthy: false
+    manifest: null
+    excludedReason: Not a widget endpoint (manifest delivery).

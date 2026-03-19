@@ -1,6 +1,5 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
-
 metadata:
   id: dashboard.home
   name: Dashboard Home
@@ -23,7 +22,6 @@ metadata:
   visibility: private
   status: active
   locale: es-MX
-
 source:
   type: rest
   protocol: https
@@ -39,28 +37,13 @@ source:
   rateLimitHint:
     requests: 60
     per: minute
-
 auth:
   type: none
   required: false
   fields: []
-  notes:
-    - This integration does not require credentials.
-
+  notes: []
 config:
-  fields:
-    - key: customTitle
-      label: Custom title
-      description: Optional custom widget title shown in the dashboard.
-      type: string
-      required: false
-      default: ""
-      minLength: 0
-      maxLength: 80
-      placeholder: Dashboard Home
-      ui:
-        width: full
-
+  fields: []
 input:
   pathParams: []
   queryParams: []
@@ -69,7 +52,6 @@ input:
     enabled: false
     contentType: application/json
     template: {}
-
 refresh:
   enabled: true
   mode: polling
@@ -89,7 +71,6 @@ refresh:
   dedupeWindowSeconds: 30
   maxRefreshPerHour: 12
   cron: null
-
 cache:
   enabled: true
   strategy: ttl
@@ -102,7 +83,6 @@ cache:
     unit: minutes
   scope: user
   keyTemplate: "integration:{metadata.id}"
-
 sse:
   enabled: true
   frontendPushEnabled: true
@@ -111,7 +91,6 @@ sse:
   broadcastScope: user
   emitOnlyOnChange: true
   heartbeatSeconds: 25
-
 output:
   format: object
   primaryFields:
@@ -181,7 +160,6 @@ output:
       - data
   normalization:
     enabled: false
-
 ui:
   widget:
     type: composite
@@ -206,7 +184,6 @@ ui:
     icon: dashboard
     color: slate
     preferredLayout: wide
-
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -216,7 +193,6 @@ policies:
   redactSensitiveFields: true
   storeSecretsSeparately: true
   allowClientSideExecution: false
-
 observability:
   enabled: true
   logLevel: standard
@@ -228,21 +204,15 @@ observability:
   healthcheck:
     enabled: true
     timeoutMs: 3000
-
 docs:
   summary: Returns aggregated data for the dashboard home view.
-  setupInstructions:
-    - No credentials are required.
-    - Add the manifest URL to the dashboard system.
-  notes:
-    - Replace API_BASE_URL with your deployment domain.
+  setupInstructions: []
+  notes: []
   changelog:
     - version: 1.0.0
       description: Initial manifest version for dashboard home.
-
 examples:
-  config:
-    customTitle: ""
+  config: {}
   auth: {}
   expectedResponse:
     success: true

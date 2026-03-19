@@ -1,0 +1,32 @@
+- slug: health
+  id: system.health.check
+  name: API Health
+  format:
+    - yaml
+    - json
+  path: /integrations/manifests/health
+  file: health.yaml
+- slug: hoy-no-circula-today
+  id: mobility.hoy-no-circula.today
+  name: Hoy No Circula Today
+  format:
+    - yaml
+    - json
+  path: /integrations/manifests/hoy-no-circula-today
+  file: hoy-no-circula-today.yaml
+- slug: weather-current
+  id: weather.current
+  name: Weather Current
+  format:
+    - yaml
+    - json
+  path: /integrations/manifests/weather-current
+  file: weather-current.yaml
+- slug: dashboard-home
+  id: dashboard.home
+  name: Dashboard Home
+  format:
+    - yaml
+    - json
+  path: /integrations/manifests/dashboard-home
+  file: dashboard-home.yaml

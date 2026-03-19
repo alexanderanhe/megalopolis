@@ -26,6 +26,16 @@ copyDir(
 );
 
 copyFile(
+  path.join(projectRoot, 'src', 'integrations', 'manifest-registry.yaml'),
+  path.join(distRoot, 'integrations', 'manifest-registry.yaml')
+);
+
+copyFile(
   path.join(projectRoot, 'docs', 'openapi.yaml'),
   path.join(distRoot, 'docs', 'openapi.yaml')
+);
+
+copyFile(
+  path.join(projectRoot, 'docs', 'api-routes.yaml'),
+  path.join(distRoot, 'docs', 'api-routes.yaml')
 );
