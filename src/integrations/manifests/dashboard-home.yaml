@@ -184,6 +184,53 @@ ui:
     icon: dashboard
     color: slate
     preferredLayout: wide
+  layout:
+    variant: summary-card
+    density: comfortable
+    sections:
+      - id: header
+        type: inline
+        fields:
+          - title
+          - updatedAt
+      - id: primaryStatus
+        type: stack
+        fields:
+          - hncSummary
+          - weatherSummary
+      - id: footer
+        type: actions
+        fields:
+          - refresh
+  bindings:
+    title:
+      source: static
+      value: Dashboard Home
+    updatedAt:
+      source: data.updatedAt
+      formatter: timeShortEsMx
+    hncSummary:
+      source: computed.hncSummary
+    weatherSummary:
+      source: computed.weatherSummary
+  actions:
+    refresh:
+      type: refresh
+      label: Actualizar
+      icon: refresh-cw
+  states:
+    ok:
+      tone: success
+      accentColor: green
+      icon: check-circle
+    warning:
+      tone: warning
+      accentColor: amber
+      icon: alert-triangle
+    error:
+      tone: danger
+      accentColor: red
+      icon: alert-circle
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -242,3 +289,6 @@ examples:
         humidity: 55
         condition: clear
         windKph: 10
+    computed:
+      hncSummary: "Hoy NO circulan 5 y 6"
+      weatherSummary: "22°C · clear"

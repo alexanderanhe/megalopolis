@@ -136,7 +136,7 @@ output:
     enabled: false
 ui:
   widget:
-    type: stat
+    type: status-card
     title: Clima actual
     subtitle: Temperatura y condiciones
     emptyState: Sin datos
@@ -158,6 +158,56 @@ ui:
     icon: cloud
     color: blue
     preferredLayout: compact
+  layout:
+    variant: status-card
+    density: compact
+    sections:
+      - id: header
+        type: inline
+        fields:
+          - title
+          - updatedAt
+      - id: primaryStatus
+        type: stack
+        fields:
+          - temperatureLabel
+          - conditionLabel
+          - humidityLabel
+      - id: footer
+        type: actions
+        fields:
+          - refresh
+  bindings:
+    title:
+      source: static
+      value: Clima actual
+    updatedAt:
+      source: data.updatedAt
+      formatter: timeShortEsMx
+    temperatureLabel:
+      source: computed.temperatureLabel
+    conditionLabel:
+      source: data.data.condition
+    humidityLabel:
+      source: computed.humidityLabel
+  actions:
+    refresh:
+      type: refresh
+      label: Actualizar
+      icon: refresh-cw
+  states:
+    ok:
+      tone: success
+      accentColor: blue
+      icon: sun
+    warning:
+      tone: warning
+      accentColor: amber
+      icon: cloud-drizzle
+    error:
+      tone: danger
+      accentColor: red
+      icon: alert-circle
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -197,3 +247,6 @@ examples:
       humidity: 55
       condition: clear
       windKph: 10
+    computed:
+      temperatureLabel: "22°C"
+      humidityLabel: "55% humedad"

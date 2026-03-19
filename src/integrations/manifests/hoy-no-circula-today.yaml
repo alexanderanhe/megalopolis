@@ -172,6 +172,71 @@ ui:
     icon: car-off
     color: amber
     preferredLayout: compact
+  layout:
+    variant: restriction-status-card
+    density: compact
+    sections:
+      - id: header
+        type: inline
+        fields:
+          - title
+          - formattedDate
+      - id: primaryStatus
+        type: stack
+        fields:
+          - statusLabel
+          - restrictionSummary
+          - hologramSummary
+      - id: schedule
+        type: inline
+        fields:
+          - scheduleRange
+      - id: footer
+        type: actions
+        fields:
+          - details
+          - refresh
+  bindings:
+    title:
+      source: static
+      value: Hoy No Circula
+    formattedDate:
+      source: data.data.date
+      formatter: weekdayShortDateEsMx
+    statusLabel:
+      source: computed.statusLabel
+    restrictionSummary:
+      source: computed.restrictionSummary
+    hologramSummary:
+      source: computed.hologramSummary
+    scheduleRange:
+      source: computed.scheduleRange
+  actions:
+    details:
+      type: modal
+      label: Ver detalles
+      target: widget-details
+    refresh:
+      type: refresh
+      label: Actualizar
+      icon: refresh-cw
+  states:
+    ok:
+      tone: success
+      accentColor: green
+      icon: check-circle
+    restricted:
+      tone: danger
+      accentColor: red
+      icon: ban
+    warning:
+      tone: warning
+      accentColor: amber
+      icon: alert-triangle
+    error:
+      tone: danger
+      accentColor: red
+      icon: alert-circle
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -225,3 +290,8 @@ examples:
         - hibrido
         - holograma-0
         - holograma-00
+    computed:
+      statusLabel: "NO circulan"
+      restrictionSummary: "Amarillo · 5 y 6"
+      hologramSummary: "Holograma 1 y 2"
+      scheduleRange: "05:00 — 22:00"

@@ -131,6 +131,45 @@ ui:
     icon: activity
     color: green
     preferredLayout: compact
+  layout:
+    variant: status-card
+    density: compact
+    sections:
+      - id: header
+        type: inline
+        fields:
+          - title
+      - id: primaryStatus
+        type: stack
+        fields:
+          - statusLabel
+          - message
+      - id: footer
+        type: actions
+        fields:
+          - refresh
+  bindings:
+    title:
+      source: static
+      value: API Health
+    statusLabel:
+      source: computed.statusLabel
+    message:
+      source: data.message
+  actions:
+    refresh:
+      type: refresh
+      label: Actualizar
+      icon: refresh-cw
+  states:
+    ok:
+      tone: success
+      accentColor: green
+      icon: check-circle
+    error:
+      tone: danger
+      accentColor: red
+      icon: alert-circle
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -164,3 +203,5 @@ examples:
   expectedResponse:
     success: true
     message: API is running
+    computed:
+      statusLabel: OK
