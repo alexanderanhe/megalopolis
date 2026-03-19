@@ -1,6 +1,5 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
-
 metadata:
   id: mobility.hoy-no-circula.today
   name: Hoy No Circula Today
@@ -25,7 +24,6 @@ metadata:
   visibility: private
   status: active
   locale: es-MX
-
 source:
   type: rest
   protocol: https
@@ -41,65 +39,21 @@ source:
   rateLimitHint:
     requests: 60
     per: minute
-
 auth:
   type: none
   required: false
   fields: []
-  notes:
-    - This integration does not require credentials.
-
+  notes: []
 config:
-  fields:
-    - key: customTitle
-      label: Custom title
-      description: Optional custom widget title shown in the dashboard.
-      type: string
-      required: false
-      default: ""
-      minLength: 0
-      maxLength: 80
-      placeholder: Hoy No Circula
-      ui:
-        width: full
-
-    - key: includeExemptions
-      label: Include exemptions
-      description: Whether exemptions should be shown in the widget output.
-      type: boolean
-      required: false
-      default: true
-      ui:
-        width: half
-
-    - key: preferredRegionLabel
-      label: Preferred region label
-      description: Optional preferred display label for the covered area.
-      type: select
-      required: false
-      default: zmvm
-      options:
-        - label: ZMVM
-          value: zmvm
-        - label: CDMX
-          value: cdmx
-        - label: EDOMEX
-          value: edomex
-      ui:
-        width: half
-
+  fields: []
 input:
   pathParams: []
   queryParams: []
-  headers:
-    - key: X-Client-App
-      value: dashboard
-      source: static
+  headers: []
   body:
     enabled: false
     contentType: application/json
     template: {}
-
 refresh:
   enabled: true
   mode: polling
@@ -119,7 +73,6 @@ refresh:
   dedupeWindowSeconds: 30
   maxRefreshPerHour: 12
   cron: null
-
 cache:
   enabled: true
   strategy: ttl
@@ -132,7 +85,6 @@ cache:
     unit: minutes
   scope: user
   keyTemplate: "integration:{metadata.id}"
-
 sse:
   enabled: true
   frontendPushEnabled: true
@@ -141,20 +93,16 @@ sse:
   broadcastScope: user
   emitOnlyOnChange: true
   heartbeatSeconds: 25
-
 output:
   format: object
   primaryFields:
-    - title
-    - status
     - updatedAt
+    - data
   schema:
     type: object
     properties:
-      title:
-        type: string
-      status:
-        type: string
+      success:
+        type: boolean
       updatedAt:
         type: string
         format: date-time
@@ -184,10 +132,6 @@ output:
                 type: array
                 items:
                   type: string
-            required:
-              - color
-              - plateEndings
-              - holograms
           exemptions:
             type: array
             items:
@@ -199,26 +143,11 @@ output:
           - restrictionEnd
           - restrictions
     required:
-      - title
-      - status
+      - success
       - updatedAt
       - data
   normalization:
-    enabled: true
-    strategy: standard-widget-envelope
-    envelope:
-      widgetInstanceId: string
-      integrationId: string
-      status: string
-      updatedAt: string
-      cache:
-        hit: boolean
-        expiresAt: string
-      data: object
-      meta:
-        title: string
-        live: boolean
-
+    enabled: false
 ui:
   widget:
     type: status-card
@@ -243,7 +172,6 @@ ui:
     icon: car-off
     color: amber
     preferredLayout: compact
-
 policies:
   allowManualRefresh: true
   allowMultipleInstances: true
@@ -253,7 +181,6 @@ policies:
   redactSensitiveFields: true
   storeSecretsSeparately: true
   allowClientSideExecution: false
-
 observability:
   enabled: true
   logLevel: standard
@@ -265,30 +192,18 @@ observability:
   healthcheck:
     enabled: true
     timeoutMs: 3000
-
 docs:
   summary: Returns today's Hoy No Circula restrictions for CDMX and EDOMEX.
-  setupInstructions:
-    - No credentials are required.
-    - Add the manifest URL to the dashboard system.
-    - Install the integration and create a widget instance.
-  notes:
-    - This manifest describes the integration contract, not secure credentials.
-    - The endpoint should return the daily Hoy No Circula result in JSON.
-    - The widget can be refreshed periodically and broadcast through SSE.
+  setupInstructions: []
+  notes: []
   changelog:
     - version: 1.0.0
       description: Initial manifest version for the daily Hoy No Circula widget.
-
 examples:
-  config:
-    customTitle: ""
-    includeExemptions: true
-    preferredRegionLabel: zmvm
+  config: {}
   auth: {}
   expectedResponse:
-    title: Hoy No Circula
-    status: ok
+    success: true
     updatedAt: "2026-03-18T12:00:00.000Z"
     data:
       date: "2026-03-18"
