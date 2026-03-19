@@ -1,37 +1,121 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
+
 metadata:
-  id: widget.megalopolis.health
+  id: system.health.check
   name: API Health
   slug: health
   version: 1.0.0
   category: system
   subcategory: health
-  description: Health check endpoint for the Megalopolis API
+  description: Verifica que la API de Megalopolis este en linea.
   icon: activity
   tags:
     - health
     - status
     - megalopolis
+  provider:
+    name: Megalopolis API
+    website: https://megalopolis.angu.dev
+    documentation: https://megalopolis.angu.dev/docs
+  author:
+    name: Internal
+  visibility: private
+  status: active
+  locale: es-MX
+
 source:
-  type: http
+  type: rest
   protocol: https
   baseUrl: ${API_BASE_URL}
   path: /health
   method: GET
+  contentType: application/json
   accept: application/json
-  timeoutMs: 5000
+  timeoutMs: 3000
+  pagination:
+    enabled: false
+    type: none
+  rateLimitHint:
+    requests: 120
+    per: minute
+
 auth:
   type: none
   required: false
+  fields: []
+  notes:
+    - This integration does not require credentials.
+
+config:
+  fields:
+    - key: customTitle
+      label: Custom title
+      description: Optional custom widget title shown in the dashboard.
+      type: string
+      required: false
+      default: ""
+      minLength: 0
+      maxLength: 80
+      placeholder: Health
+      ui:
+        width: full
+
 input:
   pathParams: []
   queryParams: []
   headers: []
   body:
     enabled: false
+    contentType: application/json
+    template: {}
+
+refresh:
+  enabled: true
+  mode: polling
+  userConfigurable: true
+  allowedIntervals:
+    - 1m
+    - 5m
+    - 10m
+    - 15m
+  defaultInterval: 5m
+  minInterval: 1m
+  maxInterval: 15m
+  immediateOnLoad: true
+  manualRefresh: true
+  refreshOnFocus: true
+  dedupeWindowSeconds: 10
+  maxRefreshPerHour: 120
+  cron: null
+
+cache:
+  enabled: true
+  strategy: ttl
+  ttl:
+    value: 1
+    unit: minutes
+  staleWhileRevalidate: false
+  staleTtl:
+    value: 0
+    unit: minutes
+  scope: user
+  keyTemplate: "integration:{metadata.id}"
+
+sse:
+  enabled: false
+  frontendPushEnabled: false
+  eventName: widget:update
+  channel: widget
+  broadcastScope: user
+  emitOnlyOnChange: true
+  heartbeatSeconds: 25
+
 output:
-  format: json
+  format: object
+  primaryFields:
+    - status
+    - message
   schema:
     type: object
     properties:
@@ -39,11 +123,71 @@ output:
         type: boolean
       message:
         type: string
+  normalization:
+    enabled: false
+
+ui:
+  widget:
+    type: status-card
+    title: API Health
+    subtitle: Estado de la API
+    emptyState: Sin datos
+    loadingState: Verificando...
+    errorState: Error de salud
+    defaultSize:
+      w: 3
+      h: 2
+    minSize:
+      w: 2
+      h: 2
+    maxSize:
+      w: 4
+      h: 2
+    resizable: true
+    movable: true
+    liveBadge: true
+  presentation:
+    icon: activity
+    color: green
+    preferredLayout: compact
+
+policies:
+  allowManualRefresh: true
+  allowMultipleInstances: true
+  requiresAuthToInstall: false
+  requiresAuthToRun: false
+  exposeErrorsToUser: true
+  redactSensitiveFields: true
+  storeSecretsSeparately: true
+  allowClientSideExecution: false
+
+observability:
+  enabled: true
+  logLevel: standard
+  metrics:
+    trackLatency: true
+    trackErrors: true
+    trackCacheHits: true
+    trackRefreshCount: true
+  healthcheck:
+    enabled: true
+    timeoutMs: 2000
+
 docs:
-  summary: Returns a basic health message to confirm the API is running.
+  summary: Returns a health status message for the API.
+  setupInstructions:
+    - No credentials are required.
+    - Add the manifest URL to the dashboard system.
   notes:
-    - Replace baseUrl with your deployed API domain.
+    - Replace API_BASE_URL with your deployment domain.
+  changelog:
+    - version: 1.0.0
+      description: Initial manifest version for health.
+
 examples:
+  config:
+    customTitle: ""
+  auth: {}
   expectedResponse:
     success: true
     message: API is running

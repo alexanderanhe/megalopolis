@@ -1,42 +1,160 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
+
 metadata:
-  id: widget.megalopolis.hoy-no-circula.today
+  id: mobility.hoy-no-circula.today
   name: Hoy No Circula Today
   slug: hoy-no-circula-today
   version: 1.0.0
   category: mobility
   subcategory: restrictions
-  description: Today's Hoy No Circula restrictions for CDMX
-  icon: car
+  description: Muestra las restricciones vehiculares del día para Hoy No Circula en CDMX y EDOMEX.
+  icon: car-off
   tags:
     - hoy-no-circula
     - mobility
     - cdmx
+    - edomex
+    - restrictions
+  provider:
+    name: Megalopolis API
+    website: https://megalopolis.angu.dev
+    documentation: https://megalopolis.angu.dev/docs
+  author:
+    name: Internal
+  visibility: private
+  status: active
+  locale: es-MX
+
 source:
-  type: http
+  type: rest
   protocol: https
   baseUrl: ${API_BASE_URL}
   path: /hoy-no-circula/today
   method: GET
+  contentType: application/json
   accept: application/json
   timeoutMs: 8000
+  pagination:
+    enabled: false
+    type: none
+  rateLimitHint:
+    requests: 60
+    per: minute
+
 auth:
   type: none
   required: false
+  fields: []
+  notes:
+    - This integration does not require credentials.
+
+config:
+  fields:
+    - key: customTitle
+      label: Custom title
+      description: Optional custom widget title shown in the dashboard.
+      type: string
+      required: false
+      default: ""
+      minLength: 0
+      maxLength: 80
+      placeholder: Hoy No Circula
+      ui:
+        width: full
+
+    - key: includeExemptions
+      label: Include exemptions
+      description: Whether exemptions should be shown in the widget output.
+      type: boolean
+      required: false
+      default: true
+      ui:
+        width: half
+
+    - key: preferredRegionLabel
+      label: Preferred region label
+      description: Optional preferred display label for the covered area.
+      type: select
+      required: false
+      default: zmvm
+      options:
+        - label: ZMVM
+          value: zmvm
+        - label: CDMX
+          value: cdmx
+        - label: EDOMEX
+          value: edomex
+      ui:
+        width: half
+
 input:
   pathParams: []
   queryParams: []
-  headers: []
+  headers:
+    - key: X-Client-App
+      value: dashboard
+      source: static
   body:
     enabled: false
+    contentType: application/json
+    template: {}
+
+refresh:
+  enabled: true
+  mode: polling
+  userConfigurable: true
+  allowedIntervals:
+    - 5m
+    - 10m
+    - 15m
+    - 30m
+    - 1h
+  defaultInterval: 10m
+  minInterval: 5m
+  maxInterval: 1h
+  immediateOnLoad: true
+  manualRefresh: true
+  refreshOnFocus: false
+  dedupeWindowSeconds: 30
+  maxRefreshPerHour: 12
+  cron: null
+
+cache:
+  enabled: true
+  strategy: ttl
+  ttl:
+    value: 10
+    unit: minutes
+  staleWhileRevalidate: true
+  staleTtl:
+    value: 5
+    unit: minutes
+  scope: user
+  keyTemplate: "integration:{metadata.id}"
+
+sse:
+  enabled: true
+  frontendPushEnabled: true
+  eventName: widget:update
+  channel: widget
+  broadcastScope: user
+  emitOnlyOnChange: true
+  heartbeatSeconds: 25
+
 output:
-  format: json
+  format: object
+  primaryFields:
+    - title
+    - status
+    - updatedAt
   schema:
     type: object
     properties:
-      success:
-        type: boolean
+      title:
+        type: string
+      status:
+        type: string
       updatedAt:
         type: string
         format: date-time
@@ -66,22 +184,117 @@ output:
                 type: array
                 items:
                   type: string
+            required:
+              - color
+              - plateEndings
+              - holograms
           exemptions:
             type: array
             items:
               type: string
+        required:
+          - date
+          - scope
+          - restrictionStart
+          - restrictionEnd
+          - restrictions
+    required:
+      - title
+      - status
+      - updatedAt
+      - data
+  normalization:
+    enabled: true
+    strategy: standard-widget-envelope
+    envelope:
+      widgetInstanceId: string
+      integrationId: string
+      status: string
+      updatedAt: string
+      cache:
+        hit: boolean
+        expiresAt: string
+      data: object
+      meta:
+        title: string
+        live: boolean
+
+ui:
+  widget:
+    type: status-card
+    title: Hoy No Circula
+    subtitle: Restricciones vehiculares de hoy
+    emptyState: No hay información disponible.
+    loadingState: Cargando restricciones...
+    errorState: No fue posible cargar la información.
+    defaultSize:
+      w: 4
+      h: 2
+    minSize:
+      w: 3
+      h: 2
+    maxSize:
+      w: 6
+      h: 4
+    resizable: true
+    movable: true
+    liveBadge: true
+  presentation:
+    icon: car-off
+    color: amber
+    preferredLayout: compact
+
+policies:
+  allowManualRefresh: true
+  allowMultipleInstances: true
+  requiresAuthToInstall: false
+  requiresAuthToRun: false
+  exposeErrorsToUser: false
+  redactSensitiveFields: true
+  storeSecretsSeparately: true
+  allowClientSideExecution: false
+
+observability:
+  enabled: true
+  logLevel: standard
+  metrics:
+    trackLatency: true
+    trackErrors: true
+    trackCacheHits: true
+    trackRefreshCount: true
+  healthcheck:
+    enabled: true
+    timeoutMs: 3000
+
 docs:
-  summary: Returns today's Hoy No Circula rules.
+  summary: Returns today's Hoy No Circula restrictions for CDMX and EDOMEX.
+  setupInstructions:
+    - No credentials are required.
+    - Add the manifest URL to the dashboard system.
+    - Install the integration and create a widget instance.
   notes:
-    - Replace baseUrl with your deployed API domain.
+    - This manifest describes the integration contract, not secure credentials.
+    - The endpoint should return the daily Hoy No Circula result in JSON.
+    - The widget can be refreshed periodically and broadcast through SSE.
+  changelog:
+    - version: 1.0.0
+      description: Initial manifest version for the daily Hoy No Circula widget.
+
 examples:
+  config:
+    customTitle: ""
+    includeExemptions: true
+    preferredRegionLabel: zmvm
+  auth: {}
   expectedResponse:
-    success: true
-    updatedAt: 2026-03-18T12:00:00.000Z
+    title: Hoy No Circula
+    status: ok
+    updatedAt: "2026-03-18T12:00:00.000Z"
     data:
-      date: 2026-03-18
+      date: "2026-03-18"
       scope:
         - cdmx
+        - edomex
       restrictionStart: "05:00"
       restrictionEnd: "22:00"
       restrictions:
@@ -90,7 +303,10 @@ examples:
           - 5
           - 6
         holograms:
-          - 1
-          - 2
+          - "1"
+          - "2"
       exemptions:
         - electrico
+        - hibrido
+        - holograma-0
+        - holograma-00

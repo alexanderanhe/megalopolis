@@ -1,29 +1,66 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
+
 metadata:
-  id: widget.megalopolis.weather.current
+  id: weather.current
   name: Weather Current
   slug: weather-current
   version: 1.0.0
   category: weather
   subcategory: current
-  description: Current weather for a city
+  description: Clima actual por ciudad.
   icon: cloud
   tags:
     - weather
     - current
     - megalopolis
+  provider:
+    name: Megalopolis API
+    website: https://megalopolis.angu.dev
+    documentation: https://megalopolis.angu.dev/docs
+  author:
+    name: Internal
+  visibility: private
+  status: active
+  locale: es-MX
+
 source:
-  type: http
+  type: rest
   protocol: https
   baseUrl: ${API_BASE_URL}
   path: /weather/current
   method: GET
+  contentType: application/json
   accept: application/json
   timeoutMs: 8000
+  pagination:
+    enabled: false
+    type: none
+  rateLimitHint:
+    requests: 60
+    per: minute
+
 auth:
   type: none
   required: false
+  fields: []
+  notes:
+    - This integration does not require credentials.
+
+config:
+  fields:
+    - key: customTitle
+      label: Custom title
+      description: Optional custom widget title shown in the dashboard.
+      type: string
+      required: false
+      default: ""
+      minLength: 0
+      maxLength: 80
+      placeholder: Clima actual
+      ui:
+        width: full
+
 input:
   pathParams: []
   queryParams:
@@ -34,8 +71,57 @@ input:
   headers: []
   body:
     enabled: false
+    contentType: application/json
+    template: {}
+
+refresh:
+  enabled: true
+  mode: polling
+  userConfigurable: true
+  allowedIntervals:
+    - 5m
+    - 10m
+    - 15m
+    - 30m
+    - 1h
+  defaultInterval: 10m
+  minInterval: 5m
+  maxInterval: 1h
+  immediateOnLoad: true
+  manualRefresh: true
+  refreshOnFocus: false
+  dedupeWindowSeconds: 30
+  maxRefreshPerHour: 12
+  cron: null
+
+cache:
+  enabled: true
+  strategy: ttl
+  ttl:
+    value: 10
+    unit: minutes
+  staleWhileRevalidate: true
+  staleTtl:
+    value: 5
+    unit: minutes
+  scope: user
+  keyTemplate: "integration:{metadata.id}:{input.city}"
+
+sse:
+  enabled: true
+  frontendPushEnabled: true
+  eventName: widget:update
+  channel: widget
+  broadcastScope: user
+  emitOnlyOnChange: true
+  heartbeatSeconds: 25
+
 output:
-  format: json
+  format: object
+  primaryFields:
+    - city
+    - temperatureC
+    - condition
   schema:
     type: object
     properties:
@@ -57,16 +143,84 @@ output:
             type: string
           windKph:
             type: number
+        required:
+          - city
+          - temperatureC
+          - humidity
+          - condition
+          - windKph
+    required:
+      - success
+      - updatedAt
+      - data
+  normalization:
+    enabled: false
+
+ui:
+  widget:
+    type: stat
+    title: Clima actual
+    subtitle: Temperatura y condiciones
+    emptyState: Sin datos
+    loadingState: Cargando clima...
+    errorState: Error al cargar el clima
+    defaultSize:
+      w: 3
+      h: 2
+    minSize:
+      w: 2
+      h: 2
+    maxSize:
+      w: 5
+      h: 3
+    resizable: true
+    movable: true
+    liveBadge: true
+  presentation:
+    icon: cloud
+    color: blue
+    preferredLayout: compact
+
+policies:
+  allowManualRefresh: true
+  allowMultipleInstances: true
+  requiresAuthToInstall: false
+  requiresAuthToRun: false
+  exposeErrorsToUser: false
+  redactSensitiveFields: true
+  storeSecretsSeparately: true
+  allowClientSideExecution: false
+
+observability:
+  enabled: true
+  logLevel: standard
+  metrics:
+    trackLatency: true
+    trackErrors: true
+    trackCacheHits: true
+    trackRefreshCount: true
+  healthcheck:
+    enabled: true
+    timeoutMs: 3000
+
 docs:
   summary: Returns current weather data for the requested city.
+  setupInstructions:
+    - No credentials are required.
+    - Add the manifest URL to the dashboard system.
   notes:
-    - Replace baseUrl with your deployed API domain.
+    - Replace API_BASE_URL with your deployment domain.
+  changelog:
+    - version: 1.0.0
+      description: Initial manifest version for current weather.
+
 examples:
   config:
-    city: cdmx
+    customTitle: ""
+  auth: {}
   expectedResponse:
     success: true
-    updatedAt: 2026-03-18T12:00:00.000Z
+    updatedAt: "2026-03-18T12:00:00.000Z"
     data:
       city: cdmx
       temperatureC: 22

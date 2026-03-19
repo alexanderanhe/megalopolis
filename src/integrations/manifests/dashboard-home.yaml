@@ -1,37 +1,123 @@
 apiVersion: dashboard.integrations/v1alpha1
 kind: WidgetIntegration
+
 metadata:
-  id: widget.megalopolis.dashboard.home
+  id: dashboard.home
   name: Dashboard Home
   slug: dashboard-home
   version: 1.0.0
   category: dashboard
   subcategory: home
-  description: Aggregated data for the home dashboard (weather + hoy no circula)
+  description: Agrega la data de clima y Hoy No Circula en un solo endpoint.
   icon: dashboard
   tags:
     - dashboard
     - home
     - megalopolis
+  provider:
+    name: Megalopolis API
+    website: https://megalopolis.angu.dev
+    documentation: https://megalopolis.angu.dev/docs
+  author:
+    name: Internal
+  visibility: private
+  status: active
+  locale: es-MX
+
 source:
-  type: http
+  type: rest
   protocol: https
   baseUrl: ${API_BASE_URL}
   path: /dashboard/home
   method: GET
+  contentType: application/json
   accept: application/json
   timeoutMs: 8000
+  pagination:
+    enabled: false
+    type: none
+  rateLimitHint:
+    requests: 60
+    per: minute
+
 auth:
   type: none
   required: false
+  fields: []
+  notes:
+    - This integration does not require credentials.
+
+config:
+  fields:
+    - key: customTitle
+      label: Custom title
+      description: Optional custom widget title shown in the dashboard.
+      type: string
+      required: false
+      default: ""
+      minLength: 0
+      maxLength: 80
+      placeholder: Dashboard Home
+      ui:
+        width: full
+
 input:
   pathParams: []
   queryParams: []
   headers: []
   body:
     enabled: false
+    contentType: application/json
+    template: {}
+
+refresh:
+  enabled: true
+  mode: polling
+  userConfigurable: true
+  allowedIntervals:
+    - 5m
+    - 10m
+    - 15m
+    - 30m
+    - 1h
+  defaultInterval: 10m
+  minInterval: 5m
+  maxInterval: 1h
+  immediateOnLoad: true
+  manualRefresh: true
+  refreshOnFocus: false
+  dedupeWindowSeconds: 30
+  maxRefreshPerHour: 12
+  cron: null
+
+cache:
+  enabled: true
+  strategy: ttl
+  ttl:
+    value: 10
+    unit: minutes
+  staleWhileRevalidate: true
+  staleTtl:
+    value: 5
+    unit: minutes
+  scope: user
+  keyTemplate: "integration:{metadata.id}"
+
+sse:
+  enabled: true
+  frontendPushEnabled: true
+  eventName: widget:update
+  channel: widget
+  broadcastScope: user
+  emitOnlyOnChange: true
+  heartbeatSeconds: 25
+
 output:
-  format: json
+  format: object
+  primaryFields:
+    - updatedAt
+    - hoyNoCircula
+    - weather
   schema:
     type: object
     properties:
@@ -86,19 +172,87 @@ output:
                 type: string
               windKph:
                 type: number
+        required:
+          - hoyNoCircula
+          - weather
+    required:
+      - success
+      - updatedAt
+      - data
+  normalization:
+    enabled: false
+
+ui:
+  widget:
+    type: composite
+    title: Dashboard Home
+    subtitle: Resumen diario
+    emptyState: Sin datos
+    loadingState: Cargando resumen...
+    errorState: Error al cargar el resumen
+    defaultSize:
+      w: 6
+      h: 3
+    minSize:
+      w: 4
+      h: 3
+    maxSize:
+      w: 8
+      h: 4
+    resizable: true
+    movable: true
+    liveBadge: true
+  presentation:
+    icon: dashboard
+    color: slate
+    preferredLayout: wide
+
+policies:
+  allowManualRefresh: true
+  allowMultipleInstances: true
+  requiresAuthToInstall: false
+  requiresAuthToRun: false
+  exposeErrorsToUser: false
+  redactSensitiveFields: true
+  storeSecretsSeparately: true
+  allowClientSideExecution: false
+
+observability:
+  enabled: true
+  logLevel: standard
+  metrics:
+    trackLatency: true
+    trackErrors: true
+    trackCacheHits: true
+    trackRefreshCount: true
+  healthcheck:
+    enabled: true
+    timeoutMs: 3000
+
 docs:
   summary: Returns aggregated data for the dashboard home view.
+  setupInstructions:
+    - No credentials are required.
+    - Add the manifest URL to the dashboard system.
   notes:
-    - Replace baseUrl with your deployed API domain.
+    - Replace API_BASE_URL with your deployment domain.
+  changelog:
+    - version: 1.0.0
+      description: Initial manifest version for dashboard home.
+
 examples:
+  config:
+    customTitle: ""
+  auth: {}
   expectedResponse:
     success: true
-    updatedAt: 2026-03-18T12:00:00.000Z
+    updatedAt: "2026-03-18T12:00:00.000Z"
     data:
       hoyNoCircula:
-        date: 2026-03-18
+        date: "2026-03-18"
         scope:
           - cdmx
+          - edomex
         restrictionStart: "05:00"
         restrictionEnd: "22:00"
         restrictions:
@@ -107,10 +261,11 @@ examples:
             - 5
             - 6
           holograms:
-            - 1
-            - 2
+            - "1"
+            - "2"
         exemptions:
           - electrico
+          - hibrido
       weather:
         city: cdmx
         temperatureC: 22
