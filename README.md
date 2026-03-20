@@ -142,6 +142,11 @@ src/
     "humidity": 48,
     "condition": "Parcialmente nublado",
     "windKph": 12
+  },
+  "computed": {
+    "temperatureLabel": "22°C",
+    "humidityLabel": "48% humedad",
+    "windLabel": "12 km/h"
   }
 }
 ~~~

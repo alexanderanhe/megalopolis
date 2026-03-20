@@ -68,6 +68,10 @@ routes:
         humidity: number
         condition: string
         windKph: number
+      computed:
+        temperatureLabel: string
+        humidityLabel: string
+        windLabel: string
     widgetWorthy: true
     manifest: weather-current
   - path: /dashboard/home

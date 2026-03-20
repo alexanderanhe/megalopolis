@@ -102,6 +102,9 @@ output:
     - city
     - temperatureC
     - condition
+    - computed.temperatureLabel
+    - computed.humidityLabel
+    - computed.windLabel
   schema:
     type: object
     properties:
@@ -129,10 +132,24 @@ output:
           - humidity
           - condition
           - windKph
+      computed:
+        type: object
+        properties:
+          temperatureLabel:
+            type: string
+          humidityLabel:
+            type: string
+          windLabel:
+            type: string
+        required:
+          - temperatureLabel
+          - humidityLabel
+          - windLabel
     required:
       - success
       - updatedAt
       - data
+      - computed
   normalization:
     enabled: false
 ui:
@@ -253,3 +270,4 @@ examples:
     computed:
       temperatureLabel: "22°C"
       humidityLabel: "55% humedad"
+      windLabel: "10 km/h"

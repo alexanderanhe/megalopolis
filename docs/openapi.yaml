@@ -154,6 +154,8 @@ components:
           example: 2026-03-18T00:00:00.000Z
         data:
           $ref: '#/components/schemas/WeatherData'
+        computed:
+          $ref: '#/components/schemas/WeatherComputed'
     WeatherData:
       type: object
       properties:
@@ -172,6 +174,18 @@ components:
         windKph:
           type: number
           example: 12
+    WeatherComputed:
+      type: object
+      properties:
+        temperatureLabel:
+          type: string
+          example: 22°C
+        humidityLabel:
+          type: string
+          example: 48% humedad
+        windLabel:
+          type: string
+          example: 12 km/h
     DashboardResponse:
       type: object
       properties:
