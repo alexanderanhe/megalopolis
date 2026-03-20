@@ -39,6 +39,12 @@ routes:
           plateEndings: number[]
           holograms: string[]
         exemptions: string[]
+      computed:
+        formattedDate: string
+        restrictionSummary: string
+        hologramSummary: string
+        restrictionHours: string
+      widgetStatus: string
     widgetWorthy: true
     manifest: hoy-no-circula-today
   - path: /weather/current

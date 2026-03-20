@@ -83,6 +83,11 @@ components:
           example: 2026-03-18T00:00:00.000Z
         data:
           $ref: '#/components/schemas/HncData'
+        computed:
+          $ref: '#/components/schemas/HncComputed'
+        widgetStatus:
+          type: string
+          example: restricted
     HncData:
       type: object
       properties:
@@ -122,6 +127,21 @@ components:
           items:
             type: string
           example: ["00", "0", "eléctricos", "híbridos"]
+    HncComputed:
+      type: object
+      properties:
+        formattedDate:
+          type: string
+          example: Viernes · 20 Mar
+        restrictionSummary:
+          type: string
+          example: Rojo · 3 y 4
+        hologramSummary:
+          type: string
+          example: Holograma 1 y 2
+        restrictionHours:
+          type: string
+          example: 05:00 — 22:00
     WeatherResponse:
       type: object
       properties:

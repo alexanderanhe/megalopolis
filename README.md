@@ -119,7 +119,14 @@ src/
       "holograms": ["1", "2"]
     },
     "exemptions": ["00", "0", "eléctricos", "híbridos"]
-  }
+  },
+  "computed": {
+    "formattedDate": "Viernes · 18 Mar",
+    "restrictionSummary": "Rojo · 3 y 4",
+    "hologramSummary": "Holograma 1 y 2",
+    "restrictionHours": "05:00 — 22:00"
+  },
+  "widgetStatus": "restricted"
 }
 ~~~
 

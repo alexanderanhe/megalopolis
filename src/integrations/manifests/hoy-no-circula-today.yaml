@@ -112,6 +112,11 @@ output:
     - data.restrictions.holograms
     - data.restrictionStart
     - data.restrictionEnd
+    - computed.formattedDate
+    - computed.restrictionSummary
+    - computed.hologramSummary
+    - computed.restrictionHours
+    - widgetStatus
   schema:
     type: object
     properties:
@@ -160,10 +165,30 @@ output:
           - restrictionStart
           - restrictionEnd
           - restrictions
+      computed:
+        type: object
+        properties:
+          formattedDate:
+            type: string
+          restrictionSummary:
+            type: string
+          hologramSummary:
+            type: string
+          restrictionHours:
+            type: string
+        required:
+          - formattedDate
+          - restrictionSummary
+          - hologramSummary
+          - restrictionHours
+      widgetStatus:
+        type: string
     required:
       - success
       - updatedAt
       - data
+      - computed
+      - widgetStatus
   normalization:
     enabled: false
     strategy: none
@@ -228,8 +253,7 @@ ui:
       value: Hoy No Circula
 
     formattedDate:
-      source: data.data.date
-      formatter: weekdayShortDateEsMx
+      source: data.computed.formattedDate
 
     restrictionColor:
       source: data.data.restrictions.color
@@ -244,8 +268,7 @@ ui:
       label: Holograma
 
     restrictionHours:
-      source: static
-      value: "05:00 — 22:00"
+      source: data.computed.restrictionHours
       label: Horario
 
   actions:
@@ -306,9 +329,7 @@ docs:
   summary: Returns today's Hoy No Circula restrictions for CDMX and EDOMEX.
   setupInstructions: []
   notes:
-    - This manifest is aligned to the current raw API response.
-    - It does not require a normalized computed payload.
-    - If the runtime later adds computed fields, this manifest can be upgraded.
+    - This manifest includes computed fields for normalized responses.
   changelog:
     - version: 1.0.1
       description: Adjusted bindings and UI structure to match the current API response shape.
@@ -339,3 +360,9 @@ examples:
         - "0"
         - eléctricos
         - híbridos
+    computed:
+      formattedDate: "Viernes · 19 Mar"
+      restrictionSummary: "Rojo · 3 y 4"
+      hologramSummary: "Holograma 1 y 2"
+      restrictionHours: "05:00 — 22:00"
+    widgetStatus: restricted
