@@ -4,7 +4,7 @@ metadata:
   id: weather.current
   name: Weather Current
   slug: weather-current
-  version: 1.0.0
+  version: 1.0.1
   category: weather
   subcategory: current
   description: Clima actual por ciudad.
@@ -48,9 +48,10 @@ input:
   pathParams: []
   queryParams:
     - key: city
-      source: user
+      source: static
       required: true
       queryName: city
+      value: cdmx
   headers: []
   body:
     enabled: false
@@ -86,7 +87,7 @@ cache:
     value: 5
     unit: minutes
   scope: user
-  keyTemplate: "integration:{metadata.id}:{input.city}"
+  keyTemplate: "integration:{metadata.id}:city:cdmx"
 sse:
   enabled: true
   frontendPushEnabled: true
@@ -235,6 +236,8 @@ docs:
   changelog:
     - version: 1.0.0
       description: Initial manifest version for current weather.
+    - version: 1.0.1
+      description: Provide a default city query param to avoid validation errors.
 examples:
   config: {}
   auth: {}
